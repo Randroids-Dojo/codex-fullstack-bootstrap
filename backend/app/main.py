@@ -9,7 +9,19 @@ from . import crud
 # Ensure DB tables exist for demo purposes (in prod use Alembic)
 Base.metadata.create_all(bind=engine)
 
+from fastapi.middleware.cors import CORSMiddleware
+
+
 app = FastAPI(title="Hello World Bootstrap Backend")
+
+# Allow frontend dev server access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, restrict this
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")

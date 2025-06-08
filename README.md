@@ -1,6 +1,9 @@
 # Codex Full-Stack Bootstrap
 
-> A tiny, batteries-included starter that shows how to glue a React front-end, a FastAPI back-end and a Node.js auth service together – all orchestrated with Docker Compose.
+
+> 🤖 This entire project was generated with Codex and the o3-2025-04-16 reasoning model from OpenAI.
+
+A tiny, batteries-included starter that shows how to glue a React front-end, a FastAPI back-end and a Node.js auth service together – all orchestrated with Docker Compose.
 
 ## Stack
 

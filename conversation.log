@@ -501,11 +501,691 @@ All changes committed and pushed to main (hash 3865983):
 
 Repo is up to date on GitHub.
 
+user
+Are we using Shadcn? We should mention it in the readme
+
+    command
+
+    $ rg shadcn
+
+    command.stdout (code: 0, duration: 0s)
+
+    docs/PROJECT_PLAN.md:- **Frontend:** React + TypeScript + Vite + shadcn-ui
+    docs/PROJECT_PLAN.md:├── frontend/               # React + Vite + shadcn
+    docs/PROJECT_PLAN.md:## 7  Frontend Flow (React + shadcn)
+
+
+    command
+
+    $ rg '@shadcn' frontend || true
+
+    command.stdout (code: 0, duration: 0s)
+
+
+    command
+
+    $ cat frontend/package.json
+
+    command.stdout (code: 0, duration: 0s)
+
+    {
+      "name": "frontend",
+      "version": "0.0.0",
+      "private": true,
+    ... (21 more lines)
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: README.md
+    @@
+    -• **frontend** – React 18, Vite, TypeScript, React-Router
+    +• **frontend** – React 18, Vite, TypeScript, React-Router (plain CSS for now – shadcn/ui can be plugged in later)
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: conversation.log
+    @@
+     assistant: Added docs/api.png screenshot to README under endpoints.
+    +user: Are we using Shadcn? We should mention it in the readme.
+    +assistant: Clarified that Shadcn UI is not yet integrated; updated README frontend bullet.
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 1, duration: 0s)
+
+    Invalid Context 0:
+    assistant: Added docs/api.png screenshot to README under endpoints.
+
+    command
+
+    $ tail -n 30 conversation.log
+
+    command.stdout (code: 0, duration: 0s)
+
+         6 files changed, 53 insertions(+), 204 deletions(-)
+         delete mode 100644 PROJECT_PLAN.md
+         create mode 100644 README.md
+        ... (4 more lines)
+    ... (27 more lines)
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: conversation.log
+    @@
+      ctrl+c to exit | "/" to see commands | enter to send — 97% context left
+    +
+    +user: Are we using Shadcn? We should mention it in the readme.
+    +assistant: Clarified README – frontend currently uses plain CSS; shadcn/ui can be added later.
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ git commit -am "docs: clarify shadcn usage in README and log"
+
+    command.stdout (code: 0, duration: 0.1s)
+
+    [main a15e100] docs: clarify shadcn usage in README and log
+     3 files changed, 208 insertions(+), 1 deletion(-)
+     create mode 100644 docs/PROJECT_PLAN.md
+
+
+    command
+
+    $ git status -s
+
+    command.stdout (code: 0, duration: 0s)
+
+    ?? .idea/
+
+
+    command
+
+    $ git push
+
+    command.stdout (code: 0, duration: 1.1s)
+
+    To https://github.com/Randroids-Dojo/codex-fullstack-bootstrap.git
+       6c6d8f1..a15e100  main -> main
+
+
+codex
+README now notes that the React frontend currently uses plain CSS and that shadcn/ui could be added later.
+Updates pushed to main (commit a15e100).
+
+user
+Plugin shadcdn now
+
+    command
+
+    $ ls frontend
+
+    command.stdout (code: 0, duration: 0s)
+
+    Dockerfile
+    index.html
+    package.json
+    README.md
+    ... (5 more lines)
+
+    command
+
+    $ cat frontend/index.html
+
+    command.stdout (code: 0, duration: 0s)
+
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+    ... (10 more lines)
+
+    command
+
+    $ cat frontend/src/index.css
+
+    command.stdout (code: 0, duration: 0s)
+
+    /* Minimal reset and styling */
+    * {
+      box-sizing: border-box;
+    }
+    ... (22 more lines)
+
+    command
+
+    $ sed -n '1,120p' frontend/src/pages/Login.tsx
+
+    command.stdout (code: 0, duration: 0s)
+
+    import { FormEvent, useState } from 'react';
+    import { useNavigate } from 'react-router-dom';
+    import { login, signup } from '../api';
+    import { useAuth } from '../hooks/useAuth';
+    ... (112 more lines)
+
+    command
+
+    $ cat frontend/Dockerfile
+
+    command.stdout (code: 0, duration: 0s)
+
+    FROM node:20-alpine as base
+
+    # Set workdir
+    WORKDIR /app
+    ... (28 more lines)
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: frontend/package.json
+    @@
+       "dependencies": {
+         "axios": "^1.6.8",
+         "react": "^18.2.0",
+         "react-dom": "^18.2.0",
+    -    "react-router-dom": "^6.22.3"
+    +    "react-router-dom": "^6.22.3",
+    +    "class-variance-authority": "^0.7.0",
+    +    "lucide-react": "^0.375.0",
+    +    "tailwind-merge": "^1.14.0",
+    +    "tailwindcss-animate": "^1.0.7"
+       },
+       "devDependencies": {
+         "@types/react": "^18.2.21",
+         "@types/react-dom": "^18.2.7",
+         "@vitejs/plugin-react": "^4.4.0",
+    +    "autoprefixer": "^10.4.16",
+    +    "postcss": "^8.4.35",
+    +    "tailwindcss": "^3.4.4",
+         "typescript": "^5.4.2",
+         "vite": "^5.2.0"
+       }
+     }
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Add File: frontend/tailwind.config.ts
+    +import type { Config } from 'tailwindcss';
+    +
+    +export default {
+    +  content: [
+    +    './index.html',
+    +    './src/**/*.{ts,tsx}',
+    +  ],
+    +  theme: {
+    +    extend: {},
+    +  },
+    +  plugins: [
+    +    require('tailwindcss-animate'),
+    +  ],
+    +} satisfies Config;
+    +
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Add File: frontend/postcss.config.js
+    +export default {
+    +  plugins: {
+    +    tailwindcss: {},
+    +    autoprefixer: {},
+    +  },
+    +};
+    +
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Delete File: frontend/src/index.css
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Add File: frontend/src/index.css
+    +@tailwind base;
+    +@tailwind components;
+    +@tailwind utilities;
+    +
+    +/* App-specific tweaks */
+    +body {
+    +  @apply bg-gray-50 text-slate-900;
+    +}
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ cat frontend/src/main.tsx
+
+    command.stdout (code: 0, duration: 0s)
+
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import App from './App';
+    import './index.css';
+    ... (7 more lines)
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Add File: frontend/src/components/ui/button.tsx
+    +import { cva, type VariantProps } from 'class-variance-authority';
+    +import { cn } from '../../lib/utils';
+    +import * as React from 'react';
+    +
+    +const buttonVariants = cva(
+    +  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400
+    focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+    +  {
+    +    variants: {
+    +      variant: {
+    +        default: 'bg-slate-900 text-white hover:bg-slate-700',
+    +        outline: 'border border-slate-200 bg-white hover:bg-slate-100',
+    +        ghost: 'hover:bg-slate-100',
+    +        link: 'underline-offset-4 hover:underline text-slate-900',
+    +      },
+    +      size: {
+    +        default: 'h-10 px-4 py-2',
+    +        sm: 'h-9 rounded-md px-3',
+    +        lg: 'h-11 rounded-md px-8',
+    +        icon: 'h-10 w-10',
+    +      },
+    +    },
+    +    defaultVariants: {
+    +      variant: 'default',
+    +      size: 'default',
+    +    },
+    +  }
+    +);
+    +
+    +export interface ButtonProps
+    +  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    +    VariantProps<typeof buttonVariants> {}
+    +
+    +const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+    +  ({ className, variant, size, ...props }, ref) => {
+    +    return (
+    +      <button
+    +        className={cn(buttonVariants({ variant, size, className }))}
+    +        ref={ref}
+    +        {...props}
+    +      />
+    +    );
+    +  }
+    +);
+    +Button.displayName = 'Button';
+    +
+    +export { Button, buttonVariants };
+    +
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Add File: frontend/src/lib/utils.ts
+    +import { clsx, type ClassValue } from 'clsx';
+    +import { twMerge } from 'tailwind-merge';
+    +
+    +export function cn(...inputs: ClassValue[]) {
+    +  return twMerge(clsx(inputs));
+    +}
+    +
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: frontend/package.json
+    @@
+         "tailwind-merge": "^1.14.0",
+    -    "tailwindcss-animate": "^1.0.7"
+    +    "tailwindcss-animate": "^1.0.7",
+    +    "clsx": "^2.1.0"
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: frontend/src/pages/Login.tsx
+    @@
+    -import { FormEvent, useState } from 'react';
+    -import { useNavigate } from 'react-router-dom';
+    -import { login, signup } from '../api';
+    -import { useAuth } from '../hooks/useAuth';
+    +import { FormEvent, useState } from 'react';
+    +import { useNavigate } from 'react-router-dom';
+    +import { login, signup } from '../api';
+    +import { useAuth } from '../hooks/useAuth';
+    +import { Button } from '../components/ui/button';
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: frontend/src/pages/Login.tsx
+    @@
+    -        {error && <p style={styles.error}>{error}</p>}
+    -        <button style={styles.button} type="submit">
+    -          {mode === 'login' ? 'Login' : 'Sign up'}
+    -        </button>
+    +        {error && <p style={styles.error}>{error}</p>}
+    +        <Button className="w-full mt-2" type="submit">
+    +          {mode === 'login' ? 'Login' : 'Sign up'}
+    +        </Button>
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ sed -n '1,120p' frontend/src/pages/Dashboard.tsx
+
+    command.stdout (code: 0, duration: 0s)
+
+    import { useEffect, useState } from 'react';
+    import { fetchMe, fetchCounter, incrementCounter } from '../api';
+    import { useAuth } from '../hooks/useAuth';
+    import { useNavigate } from 'react-router-dom';
+    ... (95 more lines)
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: frontend/src/pages/Dashboard.tsx
+    @@
+    -import { useEffect, useState } from 'react';
+    -import { fetchMe, fetchCounter, incrementCounter } from '../api';
+    -import { useAuth } from '../hooks/useAuth';
+    -import { useNavigate } from 'react-router-dom';
+    +import { useEffect, useState } from 'react';
+    +import { fetchMe, fetchCounter, incrementCounter } from '../api';
+    +import { useAuth } from '../hooks/useAuth';
+    +import { useNavigate } from 'react-router-dom';
+    +import { Button } from '../components/ui/button';
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: frontend/src/pages/Dashboard.tsx
+    @@
+    -        <button style={styles.button} onClick={handleIncrement}>
+    -          Increment
+    -        </button>
+    -        <button style={{ ...styles.button, background: '#6b7280' }} onClick={handleLogout}>
+    -          Logout
+    -        </button>
+    +        <Button onClick={handleIncrement}>Increment</Button>
+    +        <Button variant="outline" onClick={handleLogout}>
+    +          Logout
+    +        </Button>
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: README.md
+    @@
+    -• **frontend** – React 18, Vite, TypeScript, React-Router (plain CSS for now – shadcn/ui can be plugged in later)
+    +• **frontend** – React 18, Vite, TypeScript, TailwindCSS + shadcn/ui, React-Router
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ git show --name-status a15e100 | head -n 40
+
+    command.stdout (code: 0, duration: 0s)
+
+    commit a15e1006bb4b8779a83ac47be0a9948722418d91
+    Author: Randy Lutcavich <randylutcavich@thisisartium.com>
+    Date:   Sun Jun 8 01:22:43 2025 -0500
+
+    ... (6 more lines)
+
+    command
+
+    $ git add frontend/** README.md
+
+    command.stdout (code: 0, duration: 0.1s)
+
+
+    command
+
+    $ git add frontend package.json frontend
+
+    command.stdout (code: 128, duration: 0s)
+
+    fatal: pathspec 'package.json' did not match any files
+
+
+    command
+
+    $ git add -A
+
+    command.stdout (code: 0, duration: 0s)
+
+
+    command
+
+    $ git commit -m "feat(frontend): integrate TailwindCSS and shadcn/ui; add UI button component; update pages; README update"
+
+    command.stdout (code: 0, duration: 0.1s)
+
+    [main f45924c] feat(frontend): integrate TailwindCSS and shadcn/ui; add UI button component; update pages; README update
+     11 files changed, 107 insertions(+), 32 deletions(-)
+     create mode 100644 .idea/.gitignore
+     create mode 100644 .idea/vcs.xml
+    ... (5 more lines)
+
+    command
+
+    $ ls -R .idea || true
+
+    command.stdout (code: 0, duration: 0s)
+
+    vcs.xml
+    workspace.xml
+
+
+    command
+
+    $ git rm -r --cached .idea
+
+    command.stdout (code: 0, duration: 0.1s)
+
+    rm '.idea/.gitignore'
+    rm '.idea/vcs.xml'
+
+
+    command
+
+    $ cat .gitignore
+
+    command.stdout (code: 0, duration: 0s)
+
+    # Python
+    __pycache__/
+    *.py[cod]
+    .venv/
+    ... (17 more lines)
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: .gitignore
+    @@
+     *.DS_Store
+    +.idea/
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+    command
+
+    $ git add .gitignore
+
+    command.stdout (code: 0, duration: 0s)
+
+
+    command
+
+    $ git commit -m "chore: remove IDE files and ignore .idea directory"
+
+    command.stdout (code: 0, duration: 0s)
+
+    [main 7c7faf1] chore: remove IDE files and ignore .idea directory
+     3 files changed, 1 insertion(+), 12 deletions(-)
+     delete mode 100644 .idea/.gitignore
+     delete mode 100644 .idea/vcs.xml
+    ... (1 more lines)
+
+    command
+
+    $ git push
+
+    command.stdout (code: 0, duration: 1s)
+
+    To https://github.com/Randroids-Dojo/codex-fullstack-bootstrap.git
+       a15e100..7c7faf1  main -> main
+
+
+    command
+
+    $ apply_patch <<'PATCH'
+    *** Begin Patch
+    *** Update File: conversation.log
+    @@
+     user: Are we using Shadcn? We should mention it in the readme.
+     assistant: Clarified README – frontend currently uses plain CSS; shadcn/ui can be added later.
+    +user: Plugin shadcdn now
+    +assistant: Integrated TailwindCSS and shadcn/ui setup in frontend (Tailwind config, PostCSS, cva button component, updated pages, README). Removed IDE files, updated
+    .gitignore. Pushed commits f45924c & 7c7faf1.
+    *** End Patch
+    PATCH
+
+    command.stdout (code: 0, duration: 0s)
+
+    Done!
+
+codex
+Shadcn UI is now integrated:
+
+• Front-end now uses Tailwind CSS + shadcn/ui.
+  – Added tailwind/postcss configs and dependencies.
+  – New reusable Button component (cva, tw-merge).
+  – Login & Dashboard pages switched to the new button.
+• README updated to reflect the stack.
+• .idea files removed; .gitignore updated.
+
+Pushed to main in two commits:
+
+    1. f45924c – Tailwind + shadcn integration
+    2. 7c7faf1 – cleanup IDE files, update .gitignore
+
 ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │                                                                                                                                                                                   │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-  ctrl+c to exit | "/" to see commands | enter to send — 97% context left
-
-user: Are we using Shadcn? We should mention it in the readme.
-assistant: Clarified README – frontend currently uses plain CSS; shadcn/ui can be added later.
+  ctrl+c to exit | "/" to see commands | enter to send — 94% context left
 

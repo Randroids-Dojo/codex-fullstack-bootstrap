@@ -1,0 +1,120 @@
+Assistant: High-level plan for a minimal full-stack, monolithic starter on the requested stack.
+
+─────────────────────────────
+1. Goals
+   • Single repo, Docker-based dev workflow, Azure-ready.
+   • Only 3 features: sign-up / login, user profile persistence, global counter any user can increment.
+
+2. Repository layout
+   /frontend   – React + TypeScript + Vite + shadcn-ui
+   /backend    – FastAPI service (incl. alembic, tests)
+   /infra      – IaC helpers (az cli scripts, GitHub Action, etc.)
+   docker-compose.yaml
+   .env, .env.dev, .env.azure → centralised config
+
+3. Docker Compose (dev)
+
+   version: "3.9"
+   services:
+     postgres:
+       image: postgres:15
+       environment: …
+       volumes: [dbdata:/var/lib/postgresql/data]
+
+     redis:
+       image: redis:7
+
+     backend:
+       build: ./backend
+       command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+       env_file: [.env, .env.dev]
+       depends_on: [postgres, redis]
+
+     frontend:
+       build: ./frontend
+       command: yarn dev --host 0.0.0.0
+       ports: ["3000:3000"]
+       environment: VITE_API_URL=http://localhost:8000
+       depends_on: [backend]
+
+   volumes:
+     dbdata:
+
+4. Backend (FastAPI)
+   • Dependencies: fastapi, uvicorn, sqlalchemy/sqlmodel, asyncpg, redis, python-jose, httpx (for BetterAuth JWKS fetch).
+   • Database models:
+       User(id, betterauth_sub, email, name)
+       GlobalCounter(id=1, value)
+   • API routes:
+       GET  /health                → {status:"ok"}
+       GET  /me                    → returns current user record
+       POST /counter/increment     → txn ++value, return new total
+       GET  /counter               → returns current total
+   • Auth dependency:
+       – Reads Authorization: Bearer <jwt from BetterAuth>
+       – Verifies sig against BetterAuth JWKS & audience
+       – On first request inserts user row.
+   • Alembic migrations generated for the two tables.
+
+5. Frontend (Vite + React + shadcn)
+   • bootstrapped with: npm create vite@latest frontend -- --template react-ts
+   • pnpm dlx shadcn-ui@latest init ‑-typescript
+   • BetterAuth JS SDK initialised in src/lib/auth.ts
+         import { createClient } from "@better-auth/js";
+         export const ba = createClient({ projectId: import.meta.env.VITE_BA_PROJECT_ID });
+   • AuthProvider handles ba.signIn(), ba.signUp(), ba.getToken()
+   • Pages:
+       – /login  (shadcn <Card>)
+       – /dashboard
+   • Dashboard fetches counter & allows increment via axios with token header.
+
+6. Environment variables (sample .env.template)
+   BETTERAUTH_PROJECT_ID=
+   BETTERAUTH_JWKS_URL=
+   BETTERAUTH_AUDIENCE=
+   DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+   REDIS_URL=redis://redis:6379/0
+
+7. Local dev flow
+   $ cp .env.template .env && fill values
+   $ docker compose up --build
+   Open http://localhost:3000 → Login → dashboard → click “Increment” → counter updates.
+
+8. Azure deployment
+   • Multi-stage Dockerfile for backend & for frontend (build → nginx static serve).
+   • docker-compose.azure.yaml configured with production images.
+   • Option 1: Azure Container Apps → az containerapp up ‑n hello-world ‑g … ‑f docker-compose.azure.yaml
+   • Option 2: Azure Web App for Containers multi-container app service.
+   • Provision PostgreSQL Flexible Server + Azure Cache for Redis; point DATABASE_URL / REDIS_URL at them.
+   • secrets stored in Azure Key Vault, injected via App Settings.
+
+9. CI/CD (GitHub Actions excerpt infra/workflow.yaml)
+   on: [push]
+   jobs:
+     build-and-push:
+       uses: azure/docker-login@v2 …
+     deploy:
+       uses: azure/container-apps-deploy-action@v1 …
+
+10. Extending
+   • Add role-based access by reading BetterAuth custom claims.
+   • Add background tasks with Celery + Redis.
+
+─────────────────────────────
+User: Think very deeply and research as needed to come up with a plan to build an entire full stack, monolithic, hello world, web app using
+   this stack:
+  - React TypeScript frontend with Vite
+  - FastAPI Python backend
+  - Better Auth authentication service (https://www.better-auth.com/docs/introduction)
+  - Docker Compose for local development
+  - Ready for deployment to Azure
+  - PostgreSQL database and Redis cache
+  - Shadcn for the UI components (https://ui.shadcn.com/)   We want absolutely minimal features so that this project can act as a bootstrap for any app in the future: - Signup and login - Persist some basic user data - Persist some basic global data that any logged-in user can mutate (for example a counter that anyone can click to count up)
+
+User: Research more about https://www.better-auth.com/
+Assistant: (summary of Better Auth docs and capabilities.)
+
+User: I think you have a fundamental misunderstanding of better auth. It is a JS framework for doing auth yourself. We need our own TypeScript server in our monolith.
+Assistant: (Updated plan inserting a Node/TS Better Auth auth-server and revised architecture.)
+
+User: Save this plan to PROJECT_PLAN.md

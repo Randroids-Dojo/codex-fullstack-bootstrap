@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchMe, fetchCounter, incrementCounter } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button';
 
 interface User {
   id: number;
@@ -59,12 +60,10 @@ export default function Dashboard() {
         <p>
           Global counter: <strong>{counter}</strong>
         </p>
-        <button style={styles.button} onClick={handleIncrement}>
-          Increment
-        </button>
-        <button style={{ ...styles.button, background: '#6b7280' }} onClick={handleLogout}>
+        <Button onClick={handleIncrement}>Increment</Button>
+        <Button variant="outline" onClick={handleLogout}>
           Logout
-        </button>
+        </Button>
       </section>
     </main>
   );

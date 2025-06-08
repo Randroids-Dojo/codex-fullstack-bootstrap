@@ -7,7 +7,7 @@
 • PostgreSQL & Redis for data and caching  
 • **auth-server** – Node.js / Express, issues JWT access & refresh tokens  
 • **backend** – FastAPI + SQLModel, protected API example  
-• **frontend** – React 18, Vite, TypeScript, React-Router (plain CSS for now – shadcn/ui can be plugged in later)
+• **frontend** – React 18, Vite, TypeScript, TailwindCSS + shadcn/ui, React-Router
 
 ## Screenshots
 

@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, signup } from '../api';
 import { useAuth } from '../hooks/useAuth';
+import { Button } from '../components/ui/button';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -50,9 +51,9 @@ export default function Login() {
           />
         </label>
         {error && <p style={styles.error}>{error}</p>}
-        <button style={styles.button} type="submit">
+        <Button className="w-full mt-2" type="submit">
           {mode === 'login' ? 'Login' : 'Sign up'}
-        </button>
+        </Button>
         <p style={{ marginTop: '1rem' }}>
           {mode === 'login' ? 'No account?' : 'Have an account?'}{' '}
           <button type="button" style={styles.linkButton} onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>

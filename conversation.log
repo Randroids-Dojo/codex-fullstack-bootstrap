@@ -2203,3 +2203,10 @@ All recent CORS fixes have already been committed and pushed to the main branch 
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
   ctrl+c to exit | "/" to see commands | enter to send — 86% context left
 
+user: Now create a really concise README.md and include these screenshots (login + dashboard).
+assistant: Added concise README.md with embedded screenshots (docs/login.png, docs/counter.png).
+user: Mention all of the endpoints (3000, 8000/docs, 4000/health).
+assistant: Updated README.md to add "Running services / endpoints" section and cleaned intro.
+user: Include ./ (FastAPI docs screenshot) in the readme as well.
+assistant: Added docs/api.png screenshot to README under endpoints.
+

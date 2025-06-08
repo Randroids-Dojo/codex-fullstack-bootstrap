@@ -6,4 +6,5 @@ export const env = {
   REDIS_URL: process.env.REDIS_URL!,
   JWT_SECRET: process.env.JWT_SECRET!,
   ISSUER: 'better-auth-demo',
+  AUDIENCE: 'fastapi-backend',
 };

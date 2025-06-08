@@ -506,3 +506,6 @@ Repo is up to date on GitHub.
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
   ctrl+c to exit | "/" to see commands | enter to send — 97% context left
 
+user: Are we using Shadcn? We should mention it in the readme.
+assistant: Clarified README – frontend currently uses plain CSS; shadcn/ui can be added later.
+

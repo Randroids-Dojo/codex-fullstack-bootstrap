@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+
+  auth-server:
+    build: ./auth-server
+    command: npm run dev
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+
+  backend:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-server
+      - postgres
+      - redis
+
+  frontend:
+    build: ./frontend
+    # Once the React codebase is scaffolded, replace the placeholder command
+    # with e.g. `npm run dev -- --host 0.0.0.0`.
+    command: sh -c "echo 'Waiting for you to scaffold the React app – see frontend/README.md' && tail -f /dev/null"
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-server
+      - backend
+
+volumes:
+  dbdata:

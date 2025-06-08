@@ -18,3 +18,4 @@ dbdata/
 
 # OS
 *.DS_Store
+.idea/

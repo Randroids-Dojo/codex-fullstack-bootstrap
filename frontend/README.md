@@ -1,26 +1,48 @@
-# Frontend (React + Vite + TypeScript + shadcn-ui)
+# Frontend – React + Vite + TypeScript
 
-The full React codebase is not included in this skeleton to keep the demo minimal and fast to clone.  
-You can scaffold it quickly with the following commands:
+This directory contains a **minimal, ready-to-run React application** used by the hello-world full-stack bootstrap.
 
-```bash
-# one-time project creation – run from repo root
-npm create vite@latest frontend -- --template react-ts
-cd frontend && pnpm dlx shadcn-ui@latest init --typescript
+Key tech:
 
-# install deps & start dev server
-pnpm install
-pnpm dev --host 0.0.0.0
-```
+* React 18 + TypeScript
+* Vite for dev server & build
+* React-Router v6 for routing
+* Axios with an interceptor that automatically attaches the JWT access-token
 
-Make sure to export the following Vite env vars (they are provided automatically when you run through `docker compose`):
+Pages implemented:
+
+1. **/login** – E-mail/password sign-in (+ sign-up toggle). Stores `access_token` in `localStorage` and React context.
+2. **/dashboard** – Displays current user profile and the global counter. Provides an “Increment” button and a Logout action.
+
+Environment variables consumed via Vite **(injected automatically when you run through `docker compose`)**
 
 ```
 VITE_AUTH_URL=http://localhost:4000/auth
 VITE_API_URL=http://localhost:8000
 ```
 
-Implement two simple pages:
-1. `/login` – collects email + password, calls `${VITE_AUTH_URL}/signup` or `/login`, stores `access_token` on success.
-2. `/dashboard` – shows the authenticated user info (`/me`) and global counter with “Increment” button.
+---
 
+## Local development
+
+```bash
+# one-off install
+cd frontend
+npm install
+
+# start vite
+npm run dev -- --host 0.0.0.0
+```
+
+Navigate to http://localhost:3000.
+
+---
+
+## Production build
+
+```
+npm run build   # outputs to dist/
+npm run preview # serves dist/ on :4173
+```
+
+The Dockerfile already performs the production build and runs `vite preview` in production or `vite dev` in development.

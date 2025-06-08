@@ -1,12 +1,31 @@
-FROM node:20-alpine
+FROM node:20-alpine as base
 
-# This is just a placeholder image so that `docker compose up --build` succeeds
-# before the real React codebase is generated.  Once you scaffold the Vite app
-# (see frontend/README.md) you can update this Dockerfile to install
-# dependencies and run `vite dev` or a production build.
-
+# Set workdir
 WORKDIR /app
 
-# Print a helpful message then keep the container running so Docker Compose
-# doesn't exit immediately.
-CMD echo "Frontend scaffold not yet generated. Follow instructions in frontend/README.md." && tail -f /dev/null
+# Copy package manifests first for better cache utilisation
+COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+
+# Install dependencies (if lockfile present)
+RUN if [ -f package-lock.json ]; then npm ci; \
+    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
+    else npm install; fi
+
+# Copy source
+COPY . .
+
+# Build for production
+RUN npm run build
+
+# -------- Runtime image --------
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=base /app /app
+
+# Expose the default Vite preview port (dist server)
+EXPOSE 4173
+
+# Default command (dev if NODE_ENV=development else preview)
+ENV NODE_ENV=production
+CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"development\" ]; then npm run dev -- --host 0.0.0.0; else npm run preview -- --host 0.0.0.0; fi"]

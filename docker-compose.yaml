@@ -38,11 +38,11 @@ services:
 
   frontend:
     build: ./frontend
-    # Once the React codebase is scaffolded, replace the placeholder command
-    # with e.g. `npm run dev -- --host 0.0.0.0`.
-    command: sh -c "echo 'Waiting for you to scaffold the React app – see frontend/README.md' && tail -f /dev/null"
     env_file:
       - .env
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host 0.0.0.0
     ports:
       - "3000:3000"
     depends_on:

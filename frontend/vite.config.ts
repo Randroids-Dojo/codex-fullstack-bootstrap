@@ -13,5 +13,16 @@ export default defineConfig(() => {
       host: true,
       port: 4173,
     },
+
+    resolve: {
+      alias: {
+        process: 'process/browser',
+      },
+    },
+
+    // Inline shim for NODE_ENV string (React warnings, Better-Auth expects)
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    },
   };
 });

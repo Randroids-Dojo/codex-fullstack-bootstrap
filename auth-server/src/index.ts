@@ -2,12 +2,10 @@ import express from 'express';
 import cors from 'cors';
 
 import { env } from './env.js';
-import { initDb } from './db.js';
-import { authRouter } from './authRouter.js';
+import { auth } from './better-auth.js';
+import { toNodeHandler } from 'better-auth/node';
 
 async function bootstrap() {
-  // Initialise database (create tables if missing)
-  await initDb();
 
   const app = express();
 
@@ -18,10 +16,11 @@ async function bootstrap() {
   );
   app.use(express.json());
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  app.get('/health', (_req: any, res: any) => res.json({ status: 'ok' }));
 
-  // Mount auth routes under /auth
-  app.use('/auth', authRouter);
+  // Mount Better Auth routes under /auth
+  // Mount at root so handler sees the full basePath in the URL.
+  app.use('/', toNodeHandler(auth.handler));
 
   app.listen(env.PORT, () => {
     console.log(`Auth-server listening on ${env.PORT}`);

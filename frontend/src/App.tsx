@@ -1,11 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import { AuthProvider, useAuth } from './hooks/useAuth';
+
+import { AuthProvider, useUser } from './authClient';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
-  const { token } = useAuth();
-  return token ? children : <Navigate to="/login" replace />;
+  const user = useUser();
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {

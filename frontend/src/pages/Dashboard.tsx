@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchMe, fetchCounter, incrementCounter } from '../api';
-import { useAuth } from '../hooks/useAuth';
+import { useLogout, useUser } from '../authClient';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 
@@ -13,9 +13,12 @@ interface User {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const logout = useLogout();
+  const userCtx = useUser();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() =>
+    userCtx ? { id: 0, sub: userCtx.sub, email: userCtx.email, name: userCtx.name } : null
+  );
   const [counter, setCounter] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

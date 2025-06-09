@@ -1,4 +1,4 @@
-FROM node:20-alpine as base
+FROM node:20-bookworm as base
 
 # Set workdir
 WORKDIR /app
@@ -6,26 +6,29 @@ WORKDIR /app
 # Copy package manifests first for better cache utilisation
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
 
-# Install dependencies (if lockfile present)
-RUN if [ -f package-lock.json ]; then npm ci; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
-    else npm install; fi
+# Disable Rollup native binary lookup and install all deps
+ENV ROLLUP_NO_BINARY=true ROLLUP_NO_NATIVE=true ROLLUP_WATCH=true
+# Install dependencies (respect any lockfile)
+RUN npm install
 
 # Copy source
 COPY . .
 
-# Build for production
-RUN npm run build
+# In dev-container mode we skip the production build and run Vite directly.
+# If you do want a static build, uncomment the following two lines and adjust
+# the runtime stage accordingly.
+# RUN npm run build
 
 # -------- Runtime image --------
-FROM node:20-alpine
+FROM node:20-bookworm
 WORKDIR /app
 COPY --from=base /app /app
 
-# Expose the default Vite preview port (dist server)
-EXPOSE 4173
+# Disable Rollup native binary at runtime as well
+ENV ROLLUP_NO_BINARY=true ROLLUP_NO_NATIVE=true ROLLUP_WATCH=true
 
-# Default command (dev if NODE_ENV=development else preview)
-ENV NODE_ENV=production
-CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"development\" ]; then npm run dev -- --host 0.0.0.0; else npm run preview -- --host 0.0.0.0; fi"]
+# Expose Vite dev port
+EXPOSE 3000
+
+# Run Vite dev server by default (can be overridden by docker-compose command)
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

@@ -202,3 +202,63 @@ Open http://localhost:3000 → sign up → dashboard → increment counter.
 
 ---
 _End of plan – ready to implement._
+
+---
+## 11  Post-mortem: first Better-Auth attempt (2025-06-09)
+
+Our initial migration to Better-Auth hit several snags.  Documenting them here
+so the second pass is deliberate.
+
+### What broke
+
+| Area | Symptom | Root cause |
+|------|---------|------------|
+| Route mounting | Requests reached Express but hung (no status) | `express.json()` consumed the body *before* Better-Auth’s handler. |
+| Provider flags | `EMAIL_AND_PASSWORD_SIGN_UP_IS_NOT_ENABLED` | Used outdated option names (`allowSignUp`, `emailAndPassword`). |
+| Adapter | Build failed on `@better-auth/adapter-postgresql` | Package doesn’t exist – docs outdated. |
+| CORS | Cookie requests failed | Wildcard `*` origin used while `withCredentials:true`. |
+| Session endpoint | Backend 404 on `/get-session` | Current endpoint is `/session`. |
+| Handler | 404 / empty response | Passed `auth.handler` instead of whole `auth` object to `toNodeHandler`. |
+
+### Second-pass plan (short)
+
+1. Re-read docs: core config, email/password, “Integrations → Express”.
+2. Minimal reproducible config (see snippet below).  Verify with curl first.
+3. Mount order: `app.use('/api', toNodeHandler(auth));` then `express.json()`.
+4. Correct provider block:
+   ```ts
+   providers: {
+     emailPassword: {
+       enabled: true,
+       enableSignUp: true,
+       requireEmailVerification: false,
+     },
+   },
+   ```
+5. Backend hits `/api/auth/session` and caches result for 60 s.
+6. Env vars: `BETTER_AUTH_SECRET`, `PUBLIC_URL`, drop JWT vars.
+7. Add debug logging (`logLevel:'debug'`) only in dev.
+8. Integration test in CI: sign-up → session → backend `/me` should return 200.
+
+```ts
+const auth = betterAuth({
+  database: new Pool({ connectionString: env.DATABASE_URL }),
+  baseURL : env.PUBLIC_URL,
+  basePath: '/auth',
+  secret  : env.BETTER_AUTH_SECRET,
+
+  providers: {
+    emailPassword: { enabled: true, enableSignUp: true },
+  },
+
+  logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  cors: { enabled: false },
+});
+
+app.use('/api', toNodeHandler(auth));   //  /api/auth/**
+app.use(express.json());
+```
+
+With these guard-rails we can attempt the integration again on a clean
+feature branch.
+

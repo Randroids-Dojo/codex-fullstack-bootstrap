@@ -17,7 +17,7 @@ Pages implemented:
 Environment variables consumed via Vite **(injected automatically when you run through `docker compose`)**
 
 ```
-VITE_AUTH_URL=http://localhost:4000/auth
+VITE_AUTH_URL=http://localhost:4000/api/auth
 VITE_API_URL=http://localhost:8000
 ```
 

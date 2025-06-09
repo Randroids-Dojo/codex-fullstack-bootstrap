@@ -7,9 +7,11 @@ WORKDIR /app
 COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
 
 # Install dependencies (if lockfile present)
-RUN if [ -f package-lock.json ]; then npm ci; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
+# Alpine + esbuild sometimes ship mismatched binary variants after npm ci; force
+# a rebuild so the embedded Go binary matches the JS wrapper version.
+RUN if [ -f package-lock.json ]; then npm ci && npm rebuild esbuild; \
+    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile && npm rebuild esbuild; \
+    elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile && npm rebuild esbuild; \
     else npm install; fi
 
 # Copy source

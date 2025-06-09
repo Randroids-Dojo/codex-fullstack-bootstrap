@@ -1,12 +1,11 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, signup } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setToken } = useAuth();
+  const { login, signup } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,12 +16,14 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     try {
-      const fn = mode === 'login' ? login : signup;
-      const { access_token: accessToken } = await fn(email, password);
-      setToken(accessToken);
+      if (mode === 'login') {
+        await login(email, password);
+      } else {
+        await signup(email, password);
+      }
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail ?? err.message);
+      setError(err.response?.data?.detail ?? err.message ?? 'Unknown error');
     }
   }
 

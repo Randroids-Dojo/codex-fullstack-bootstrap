@@ -4,8 +4,9 @@ import Dashboard from './pages/Dashboard';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
-  const { token } = useAuth();
-  return token ? children : <Navigate to="/login" replace />;
+  const { user, loading } = useAuth();
+  if (loading) return <p>Loading…</p>;
+  return user ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {

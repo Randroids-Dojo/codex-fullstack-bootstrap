@@ -1,21 +1,13 @@
 import { useEffect, useState } from 'react';
-import { fetchMe, fetchCounter, incrementCounter } from '../api';
+import { fetchCounter, incrementCounter } from '../api';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 
-interface User {
-  id: number;
-  sub: string;
-  email?: string;
-  name?: string;
-}
-
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
-  const [user, setUser] = useState<User | null>(null);
   const [counter, setCounter] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +15,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const [userData, counterData] = await Promise.all([fetchMe(), fetchCounter()]);
-        setUser(userData);
+        const counterData = await fetchCounter();
         setCounter(counterData.value);
       } catch (err: any) {
         setError(err.response?.data?.detail ?? err.message);

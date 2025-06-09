@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
 
-# You may use your preferred package manager; we'll default to npm for simplicity
-RUN npm install --silent || true
+# Install dependencies (fail if any dependency fails to install!)
+RUN npm install --silent --include=dev
 
 COPY src ./src
 

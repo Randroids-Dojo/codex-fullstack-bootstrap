@@ -262,3 +262,69 @@ app.use(express.json());
 With these guard-rails we can attempt the integration again on a clean
 feature branch.
 
+---
+## 12  Post-mortem: second Better-Auth attempt (2025-06-10)
+
+After rolling the guard-rails in §11 we tried the integration again.  The
+effort still derailed for a handful of mostly **tooling / dependency**
+issues rather than Better-Auth business logic.  Summarising to avoid a
+third déjà-vu.
+
+### What broke this time
+
+| Area | Symptom (from `conversation.log`) | Root cause |
+|------|------------------------------------|------------|
+| Better-Auth Drizzle adapter | `Error: Cannot find module 'drizzle-orm'` when `require('better-auth/adapters/drizzle')` ran in REPL | The adapter lists `drizzle-orm` and its database driver as **peerDependencies**.  We installed `better-auth` only – npm therefore skipped the peers. |
+| Postgres driver | `Cannot find module 'pg'` when `drizzle-orm/node-postgres` loaded | Same peer-dependency hole – Drizzle’s Postgres driver expects `pg` to be present. |
+| TypeScript build | `tsc` errors around `primaryKey` / `uniqueIndex` imports | We followed examples for Drizzle v0.28 while the latest is v0.30.  Some helpers were renamed. |
+| Docker (frontend) | `Error: Cannot find module @rollup/rollup-linux-*-musl` during `npm run build` inside the `node:20-alpine` stage | Vite bundles Rollup which loads a platform-specific native binding.  On Alpine (`musl`) npm’s optional-deps resolution *skips* the correct binary (npm bug #4828). |
+| Adapter path | Tried `better-auth/dist/adapters/drizzle-adapter` | The public entrypoint is `better-auth/adapters/drizzle`.  Old path tied to v1.1 docs. |
+
+### Fixes we applied
+
+1. **Peer deps** – added explicit dependencies to `auth-server/package.json`:
+   ```jsonc
+   {
+     "dependencies": {
+       "better-auth": "^1.2.8",
+       "drizzle-orm": "^0.30.0",
+       "pg": "^8.11.5"
+     }
+   }
+   ```
+   This guarantees the adapter can `require()` them in every environment.
+
+2. **Correct adapter import** –
+   ```ts
+   import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+   ```
+
+3. **Schema typings** – followed Drizzle changelog and replaced
+   `primaryKey` → `uniqueIndex` imports.  `npm run type-check` is now part
+   of CI so regressions fail fast.
+
+4. **Docker image base** – switched **all** Node Dockerfiles from
+   `node:*-alpine` → `node:*-slim` (glibc).  For ARM Macs we additionally
+   run a small script that installs the correct optional Rollup binary
+   after the normal `npm ci`.
+
+5. **Smoke test** – After build we run:
+   ```bash
+   docker compose run --rm auth-server node -e "require('better-auth')"
+   ```
+   to catch missing native/peer deps before publishing images.
+
+### Preventive action items
+
+1. Document mandatory peer-deps in README and `docs/setup.md`.
+2. Pin Drizzle version (`0.30.x`) to avoid silent breaking changes.
+3. Add `npm run type-check` & `npm run lint` to the pre-commit hook.
+4. Build matrix in CI: `amd64` + `arm64` to reproduce native binary
+   issues early.
+5. Create minimal `curl` e2e auth flow in CI (signup → login → `/session`).
+
+With the above patches integration finally completed: containers build,
+`docker compose up` boots all services, signup returns 200, backend
+`/me` returns the decoded user, and the React dashboard loads.
+
+

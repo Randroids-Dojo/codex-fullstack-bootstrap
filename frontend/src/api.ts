@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const AUTH_URL: string = import.meta.env.VITE_AUTH_URL ?? 'http://localhost:4000/auth';
+export const AUTH_URL: string = import.meta.env.VITE_AUTH_URL ?? 'http://localhost:4000/api/auth';
 export const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export const api = axios.create({
@@ -19,14 +19,42 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+async function exchangeJwt(sessionToken: string) {
+  // Better-Auth exposes the JWT endpoint at `/token` (v1.2.x). The old
+  // `/jwt/token` path is deprecated and returns 404. Swap to the correct path.
+  const { data } = await axios.get(
+    `${AUTH_URL}/token`,
+    {
+      withCredentials: true,
+    }
+  );
+  return data.token as string;
+}
+
 export async function login(email: string, password: string) {
-  const { data } = await axios.post(`${AUTH_URL}/login`, { email, password });
-  return data; // expecting { access_token }
+  // Step 1: sign-in — returns session token
+  const { data } = await axios.post(`${AUTH_URL}/sign-in/email`, {
+    email,
+    password,
+  });
+
+  const sessionToken: string = data.token;
+
+  // Step 2: exchange for JWT
+  const jwt = await exchangeJwt(sessionToken);
+  return { access_token: jwt, session_token: sessionToken };
 }
 
 export async function signup(email: string, password: string) {
-  const { data } = await axios.post(`${AUTH_URL}/signup`, { email, password });
-  return data; // expecting { access_token }
+  const { data } = await axios.post(`${AUTH_URL}/sign-up/email`, {
+    email,
+    password,
+    name: email.split('@')[0],
+  });
+
+  const sessionToken: string = data.token;
+  const jwt = await exchangeJwt(sessionToken);
+  return { access_token: jwt, session_token: sessionToken };
 }
 
 export async function fetchMe() {

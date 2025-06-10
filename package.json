@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "better-auth": "^1.2.8",
+    "drizzle-orm": "^0.29.4",
+    "pg": "^8.11.5"
+  }
+}

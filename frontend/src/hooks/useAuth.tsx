@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
-  token: string | null;
+  token: string | null; // JWT used for backend requests
   setToken: (token: string | null) => void;
   logout: () => void;
 }
@@ -23,7 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setToken = (t: string | null) => setTokenState(t);
 
-  const logout = () => setToken(null);
+  const logout = () => {
+    setToken(null);
+    // attempt to sign out server-side but ignore errors
+    import('../lib/auth').then(({ auth }) => {
+      // @ts-ignore
+      auth.signOut?.().catch(() => undefined);
+    });
+  };
 
   return (
     <AuthContext.Provider value={{ token, setToken, logout }}>

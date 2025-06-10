@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install runtime deps
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir fastapi uvicorn[standard] sqlalchemy asyncpg python-jose[cryptography] psycopg2-binary python-dotenv redis pydantic-settings
+    && pip install --no-cache-dir fastapi uvicorn[standard] sqlalchemy asyncpg python-jose[cryptography] psycopg2-binary python-dotenv redis pydantic-settings cachetools requests
 
 COPY ./app ./app
 

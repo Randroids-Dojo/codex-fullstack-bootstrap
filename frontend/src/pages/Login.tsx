@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, signup } from '../api';
+import { emailSignIn, emailSignUp } from '../lib/auth';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 
@@ -17,8 +17,8 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     try {
-      const fn = mode === 'login' ? login : signup;
-      const { access_token: accessToken } = await fn(email, password);
+      const fn = mode === 'login' ? emailSignIn : emailSignUp;
+      const { jwt: accessToken } = await fn(email, password);
       setToken(accessToken);
       navigate('/dashboard');
     } catch (err: any) {

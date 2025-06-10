@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "dev-secret"
     auth_issuer: str = "better-auth-demo"
     jwt_audience: str = "fastapi-backend"
+    auth_jwks_url: str | None = None  # e.g. http://localhost:4000/auth/jwks.json
 
     class Config(SettingsConfigDict):
         env_file = ".env"

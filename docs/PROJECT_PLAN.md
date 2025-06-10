@@ -204,6 +204,57 @@ Open http://localhost:3000 → sign up → dashboard → increment counter.
 _End of plan – ready to implement._
 
 ---
+# 12  Post-mortem ② – React-client fiasco (2025-06-10)
+
+We tried to replace the stop-gap localStorage helpers with the upstream
+`@better-auth/client` **React SDK**.  After two days of yak-shaving we still
+don’t have a stable build.  Documenting what happened so we can decide how to
+proceed.
+
+## What we attempted
+
+1. Added `@better-auth/client@0.0.2-beta.8` – latest tag available on npm.
+2. Refactored `AuthProvider` to call `createAuthClient()` and use
+   `auth.session.get()`.
+3. Wired Axios interceptor to the SDK.
+4. Docker build failed – SDK depends on `zod` and an undeclared native
+   Rollup binding.  Installed `zod`, pinned versions.
+5. Runtime broke – the prerelease exports `createAuthClient` (factory →
+   builder) but docs still mention `createBetterAuthClient`.  Fixed import.
+6. Next failure – `auth.session` undefined.  The SDK API changed again
+   (`session.get` exists only in unreleased commits).  Fallback to
+   localStorage helpers.
+
+## Root causes
+
+| Category | Issue | Impact |
+|----------|-------|--------|
+| Package maturity | Only **beta** builds on npm, semver resets often | APIs keep changing mid-integration |
+| Transitive deps  | Undeclared deps (`zod`, pre-built Rollup) | Alpine builds fail, local dev ok |
+| ESM/CJS bridge   | SDK bundles React & fetch polyfills internally | Duplicate React instances, bigger bundle |
+| Docs lag         | Docs reference APIs not published yet | We chased ghost functions |
+
+## Decision
+
+*Shelve* the SDK for now.  Stick to our thin `fetch/axios` helpers until the
+client reaches 1.0.
+
+We will:
+
+1. Revert frontend to the minimal helpers (keep the commit on a branch).
+2. Open an upstream issue summarising missing exports & peer deps.
+3. Re-evaluate when a stable `@better-auth/client` hits npm.
+
+---
+
+## Git housekeeping
+
+Branch `better-auth-react-failure` contains **all** exploratory commits up to
+this post-mortem.  We will now switch back to `main` and start a clean new
+branch for the next iteration.
+
+
+---
 ## 11  Post-mortem: first Better-Auth attempt (2025-06-09)
 
 Our initial migration to Better-Auth hit several snags.  Documenting them here

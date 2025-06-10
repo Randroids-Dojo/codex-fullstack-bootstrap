@@ -17,8 +17,16 @@ export default function Login() {
     e.preventDefault();
     setError(null);
     try {
-      const fn = mode === 'login' ? login : signup;
-      const { access_token: accessToken } = await fn(email, password);
+      let accessToken: string | null = null;
+      if (mode === 'login') {
+        const res = await login(email, password);
+        accessToken = res.access_token;
+      } else {
+        await signup(email, password);
+        // Immediately sign in to obtain JWT
+        const res = await login(email, password);
+        accessToken = res.access_token;
+      }
       setToken(accessToken);
       navigate('/dashboard');
     } catch (err: any) {
@@ -30,6 +38,8 @@ export default function Login() {
     <main style={styles.container}>
       <form style={styles.form} onSubmit={handleSubmit}>
         <h1>{mode === 'login' ? 'Login' : 'Sign up'}</h1>
+
+
         <label style={styles.label}>
           Email
           <input

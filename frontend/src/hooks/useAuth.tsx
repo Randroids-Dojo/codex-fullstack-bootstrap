@@ -10,16 +10,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setTokenState] = useState<string | null>(() =>
-    localStorage.getItem('access_token')
+    localStorage.getItem('access_token'),
   );
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('access_token', token);
-    } else {
-      localStorage.removeItem('access_token');
-    }
-  }, [token]);
 
   const setToken = (t: string | null) => setTokenState(t);
 

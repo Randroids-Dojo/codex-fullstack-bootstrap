@@ -32,10 +32,9 @@ def health():
 @app.get("/me")
 def me(user=Depends(get_current_user)):
     return {
-        "id": user.id,
-        "sub": user.sub,
-        "email": user.email,
-        "name": user.name,
+        "id": str(user.id),
+        "ba_user_id": str(user.ba_user_id),
+        "full_name": user.full_name,
     }
 
 

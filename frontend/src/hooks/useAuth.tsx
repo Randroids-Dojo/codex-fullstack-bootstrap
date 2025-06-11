@@ -13,7 +13,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.getItem('access_token'),
   );
 
-  const setToken = (t: string | null) => setTokenState(t);
+  const setToken = (t: string | null) => {
+    if (t) {
+      localStorage.setItem('access_token', t);
+    } else {
+      localStorage.removeItem('access_token');
+    }
+    setTokenState(t);
+  };
 
   const logout = () => setToken(null);
 

@@ -4,7 +4,7 @@ import { createAuthClient } from '@better-auth/client';
 const buildClient = createAuthClient();
 
 export const auth = buildClient({
-  baseURL: import.meta.env.VITE_AUTH_URL ?? 'http://localhost:4000/auth',
+  baseURL: import.meta.env.VITE_AUTH_URL ?? 'http://localhost:4000/api/auth',
   storage: 'local',
 });
 

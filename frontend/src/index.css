@@ -1,8 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* App-specific tweaks */
-body {
-  @apply bg-gray-50 text-slate-900;
-}

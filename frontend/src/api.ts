@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export const AUTH_URL: string = import.meta.env.VITE_AUTH_URL ?? 'http://localhost:4000/auth';
+// Better-Auth server is mounted at /auth on port 4000 by default. All built-in
+// endpoints (sign-in, sign-up, etc.) live **under** that base path, so we only
+// need to append the specific action here.
+export const AUTH_URL: string =
+  import.meta.env.VITE_AUTH_URL ?? 'http://localhost:4000/auth';
 export const API_URL: string = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export const api = axios.create({
@@ -19,14 +23,44 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * Sign-in using Better-Auth’s email-password endpoint.
+ *
+ * POST   /auth/sign-in/email
+ * body   { email, password }
+ * resp   { token: string, user: {...} }
+ */
 export async function login(email: string, password: string) {
-  const { data } = await axios.post(`${AUTH_URL}/login`, { email, password });
-  return data; // expecting { access_token }
+  const { data } = await axios.post(`${AUTH_URL}/sign-in/email`, {
+    email,
+    password,
+  });
+
+  // For backwards compatibility the frontend expects an `access_token`. We map
+  // the returned `token` field to that shape so existing components remain
+  // unchanged.
+  return { access_token: data.token, user: data.user };
 }
 
+/**
+ * Sign-up using Better-Auth’s email-password endpoint.
+ *
+ * POST   /auth/sign-up/email
+ * body   { name, email, password }
+ * resp   { token: string, user: {...} }
+ */
 export async function signup(email: string, password: string) {
-  const { data } = await axios.post(`${AUTH_URL}/signup`, { email, password });
-  return data; // expecting { access_token }
+  // Use the local-part of the email as a default name. Real UI could collect a
+  // proper name but this keeps the demo minimal.
+  const defaultName = email.split('@')[0];
+
+  const { data } = await axios.post(`${AUTH_URL}/sign-up/email`, {
+    name: defaultName,
+    email,
+    password,
+  });
+
+  return { access_token: data.token, user: data.user };
 }
 
 export async function fetchMe() {

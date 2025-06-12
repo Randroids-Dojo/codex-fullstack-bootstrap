@@ -20,7 +20,8 @@ services:
 
   auth-server:
     build: ./auth-server
-    command: npm run dev
+    # Run Better-Auth migrations, then start the dev server
+    command: sh -c "npm run migrate && npm run dev"
     env_file:
       - .env
     ports:

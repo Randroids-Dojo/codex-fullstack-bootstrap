@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres:16
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Wait until Postgres is ready to accept connections – required because
+    # auth-service runs migrations on start-up and will crash if it cannot
+    # connect yet.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres || exit 1"]
+      interval: 5s
+      retries: 5
+
+  migrations:
+    image: liquibase/liquibase:latest
+    entrypoint: ["liquibase"]
+    working_dir: /liquibase/changelog
+    command:
+      - "--url=jdbc:postgresql://db:5432/postgres?user=postgres&password=${POSTGRES_PASSWORD}"
+      - "--changeLogFile=master.xml"
+      - "update"
+    volumes:
+      - ./migrations:/liquibase/changelog
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+  auth:
+    build: ./auth-service
+    env_file: .env
+    ports:
+      - "3001:3001"
+    command: node dist/server.js
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+  backend:
+    build: ./backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/code
+    command: uvicorn main:app --host 0.0.0.0 --reload
+    depends_on:
+      - auth
+      - db
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: "http://localhost:8000"
+      # Absolute base URL for Better-Auth client running in the browser.
+      VITE_AUTH_BASE_URL: "http://localhost:3001/api/auth"
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./frontend:/app:cached
+      # Use an anonymous volume for node_modules so platform-specific binaries
+      # stay inside the container image rather than the host filesystem.
+      - /app/node_modules
+
+volumes:
+  pgdata:

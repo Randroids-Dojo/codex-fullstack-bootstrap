@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+
+    <!--
+        Creates the users table that backs the e-mail / password authentication layer.
+        For a true production-grade system you would likely add password reset tokens,
+        e-mail verification, last login timestamps, etc. – those are out of scope for this
+        starter and can be added with new change-sets later.
+    -->
+
+    <changeSet id="20231011-01-create-users" author="codex">
+        <createTable tableName="user">
+            <column name="id" type="VARCHAR(255)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+
+            <column name="email" type="VARCHAR(320)">
+                <constraints nullable="false" unique="true" />
+            </column>
+
+            <!-- bcrypt hash (60 chars for $2b$), leave some room -->
+            <column name="password_hash" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP" />
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP" />
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

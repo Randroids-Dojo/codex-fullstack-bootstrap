@@ -1,5 +1,7 @@
 # Full Stack "Hello World" Bootstrap
 
+> 🤖 **This project was generated with [OpenAI Codex CLI](https://github.com/openai/codex). This is a copy of the experiment ran with Claude Code [here](https://github.com/Randroids-Dojo/typescript-and-python-bootstrap). This is not an amazing experiment because it is basically trying to "one-shot" something complex instead of building more iteratively, but it was a good gauge to see how Claude Code improved with Opus 4. Unfortunately Codex was not able to fully complete the exercise. Specifically, I had to use ChatGPT (with Web Search) to get proper instructions for setting up more obscure libraries like [Better-Auth](https://github.com/better-auth/better-auth). Even after getting proper up-to-date knowledge, Codex still struggled to implement the auth use case and kept going in circles. Main has the closest to complete solution. Other branches show other attemps.**
+
 This repository contains a minimal yet functional full-stack monolithic web-application that demonstrates:
 
 * React + TypeScript (Vite) front-end with TailwindCSS & shadcn/ui components
